@@ -4,8 +4,9 @@ import { CiHeart } from "react-icons/ci";
 import { MdDelete } from "react-icons/md";
 import { IoIosAddCircle } from "react-icons/io";
 import axios from "axios";
+import API_BASE from "../../api";
 
-const Cards = ({ home, setInputDiv, data, setupdatedData }) => {
+const Cards = ({ home, setInputDiv, data, setupdatedData, refreshTasks }) => {
   const [loadingId, setLoadingId] = useState(null);
 
   const headers = {
@@ -16,12 +17,12 @@ const Cards = ({ home, setInputDiv, data, setupdatedData }) => {
   const handleCompleteTask = async (id) => {
     setLoadingId(id);
     try {
-      const response = await axios.put(
-        `http://localhost:1000/api/v2/update-complete-task/${id}`,
+      await axios.put(
+        `${API_BASE}/api/v2/update-complete-task/${id}`,
         {},
         { headers }
       );
-      alert(response.data.message);
+      refreshTasks && refreshTasks();
     } catch (error) {
       alert("Failed to update completion status.");
       console.error(error);
@@ -32,12 +33,12 @@ const Cards = ({ home, setInputDiv, data, setupdatedData }) => {
 
   const handleImportant = async (id) => {
     try {
-      const response = await axios.put(
-        `http://localhost:1000/api/v2/update-important-task/${id}`,
+      await axios.put(
+        `${API_BASE}/api/v2/update-important-task/${id}`,
         {},
         { headers }
       );
-      console.log(response.data.message);
+      refreshTasks && refreshTasks();
     } catch (error) {
       alert("Failed to update importance status.");
       console.error(error);
@@ -46,11 +47,11 @@ const Cards = ({ home, setInputDiv, data, setupdatedData }) => {
 
   const deleteTask = async (id) => {
     try {
-      const response = await axios.delete(
-        `http://localhost:1000/api/v2/delete-task/${id}`,
+      await axios.delete(
+        `${API_BASE}/api/v2/delete-task/${id}`,
         { headers }
       );
-      alert(response.data.message);
+      refreshTasks && refreshTasks();
     } catch (error) {
       alert("Failed to delete task.");
       console.error(error);
@@ -66,6 +67,7 @@ const Cards = ({ home, setInputDiv, data, setupdatedData }) => {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
       {data &&
         data.map((items) => (
+          // key must be on the outermost element returned from map
           <div
             key={items._id}
             className="flex flex-col justify-between bg-gray-800 rounded-sm p-4"
@@ -76,9 +78,8 @@ const Cards = ({ home, setInputDiv, data, setupdatedData }) => {
             </div>
             <div className="mt-4 w-full flex items-center">
               <button
-                className={`${
-                  items.complete ? "bg-green-800" : "bg-red-500"
-                } p-2 rounded w-3/6 text-white`}
+                className={`${items.complete ? "bg-green-800" : "bg-red-500"
+                  } p-2 rounded w-3/6 text-white`}
                 onClick={() => handleCompleteTask(items._id)}
                 disabled={loadingId === items._id}
               >
@@ -122,3 +123,4 @@ const Cards = ({ home, setInputDiv, data, setupdatedData }) => {
 };
 
 export default Cards;
+
